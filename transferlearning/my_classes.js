@@ -1,5 +1,5 @@
-export const IMAGENET_CLASSES = {
-  0: 'baklava',
-  1: 'hamburger',
-  2: 'chicken wings'
-};
+export const IMAGENET_CLASSES = [
+  'baklava',
+  'hamburger',
+  'chicken wings'
+];
