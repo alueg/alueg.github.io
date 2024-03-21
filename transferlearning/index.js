@@ -128,19 +128,21 @@ export async function getTopKClasses(logits, topK) {
   valuesAndIndices.sort((a, b) => {
     return b.value - a.value;
   });
+
   const topkValues = new Float32Array(topK);
   const topkIndices = new Int32Array(topK);
-  for (let i = 0; i < topK; i++) {
+  for (let i = 0; i < topK && i < valuesAndIndices.length; i++) {
     topkValues[i] = valuesAndIndices[i].value;
     topkIndices[i] = valuesAndIndices[i].index;
   }
 
   const topClassesAndProbs = [];
-  for (let i = 0; i < topkIndices.length; i++) {
+  const minLen = Math.min(topK, topkIndices.length, valuesAndIndices.length);
+  for (let i = 0; i < minLen; i++) {
     topClassesAndProbs.push({
       className: IMAGENET_CLASSES[topkIndices[i]],
       probability: topkValues[i]
-    })
+    });
   }
   return topClassesAndProbs;
 }
