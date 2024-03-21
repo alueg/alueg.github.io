@@ -47,12 +47,14 @@ function drop(ev) {
 
 import {IMAGENET_CLASSES} from './my_classes.js';
 
+
 const MOBILENET_MODEL_PATH = './mobilenet/model.json';
     // tslint:disable-next-line:max-line-length
     //'https://storage.googleapis.com/tfjs-models/tfjs/mobilenet_v1_0.25_224/model.json';
 
-const IMAGE_SIZE = 224;
-const TOPK_PREDICTIONS = 5;
+//Var originalt 224
+const IMAGE_SIZE = 512;
+const TOPK_PREDICTIONS = 3;
 
 let mobilenet;
 const mobilenetDemo = async () => {
@@ -63,21 +65,9 @@ const mobilenetDemo = async () => {
   // Warmup the model. This isn't necessary, but makes the first prediction
   // faster. Call `dispose` to release the WebGL memory allocated for the return
   // value of `predict`.
-  mobilenet.predict(tf.zeros([1, IMAGE_SIZE, IMAGE_SIZE, 3])).dispose();
+  //mobilenet.predict(tf.zeros([1, IMAGE_SIZE, IMAGE_SIZE, 3])).dispose();
 
-  status('');
-
-  // Make a prediction through the locally hosted cat.jpg.
-  const catElement = document.getElementById('cat');
-  if (catElement.complete && catElement.naturalHeight !== 0) {
-    predict(catElement);
-    catElement.style.display = '';
-  } else {
-    catElement.onload = () => {
-      predict(catElement);
-      catElement.style.display = '';
-    }
-  }
+  status('Ready');
 
   document.getElementById('file-container').style.display = '';
 };
@@ -138,19 +128,21 @@ export async function getTopKClasses(logits, topK) {
   valuesAndIndices.sort((a, b) => {
     return b.value - a.value;
   });
+
   const topkValues = new Float32Array(topK);
   const topkIndices = new Int32Array(topK);
-  for (let i = 0; i < topK; i++) {
+  for (let i = 0; i < topK && i < valuesAndIndices.length; i++) {
     topkValues[i] = valuesAndIndices[i].value;
     topkIndices[i] = valuesAndIndices[i].index;
   }
 
   const topClassesAndProbs = [];
-  for (let i = 0; i < topkIndices.length; i++) {
+  const minLen = Math.min(topK, topkIndices.length, valuesAndIndices.length);
+  for (let i = 0; i < minLen; i++) {
     topClassesAndProbs.push({
       className: IMAGENET_CLASSES[topkIndices[i]],
       probability: topkValues[i]
-    })
+    });
   }
   return topClassesAndProbs;
 }
